@@ -6,6 +6,7 @@ A continuación se muestran capturas de pantalla que presentan las partes clave 
 ### Página Principal / Registro  
 Esta imagen muestra la página inicial donde los usuarios pueden registrarse para crear una nueva cuenta o navegar a la pantalla de inicio de sesión.
 ![Captura 1](./imagenes/1.png)
+![Captura 1](./imagenes/1.5.png)
 ### Página de Inicio de Sesión  
 Esta captura muestra la página dedicada para que los usuarios existentes puedan acceder a sus cuentas.
 ![Captura 2](./imagenes/2.png)
