@@ -1,20 +1,42 @@
 <ion-header [translucent]="true">
-  <ion-toolbar>
+  <ion-toolbar color="primary">
     <ion-title>
-      Blank
+      Bienvenido {{ name }}
     </ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Blank</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content [fullscreen]="true" class="ion-padding">
 
-  <div id="container">
-    <strong>Ready to create an app?</strong>
-    <p>Start with Ionic <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
-  </div>
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>¡Listo para comenzar?</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p>Comienza a usar los componentes de la UI de Ionic para construir tu aplicación.</p>
+
+      <ion-item lines="none" class="ion-align-items-center">
+        <ion-avatar slot="start" *ngIf="avatarUrl; else defaultAvatar">
+          <img [src]="avatarUrl" />
+        </ion-avatar>
+        <ng-template #defaultAvatar>
+          <ion-avatar slot="start">
+            <img src="assets/default-avatar.png" />
+          </ion-avatar>
+        </ng-template>
+        <ion-label>
+          <h2>{{ name || 'Usuario' }}</h2>
+        </ion-label>
+      </ion-item>
+
+      <ion-button expand="full" color="secondary" (click)="goToChat()">
+        Ir al Chat
+      </ion-button>
+
+      <ion-button expand="full" color="danger" (click)="logout()" class="ion-margin-top">
+        Cerrar sesión
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
 </ion-content>

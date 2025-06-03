@@ -1,20 +1,33 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular/standalone';
+import { Component } from '@angular/core';
+import { IonicModule } from '@ionic/angular'; // IMPORTANTE para componentes Ion
+import { CommonModule } from '@angular/common'; // IMPORTANTE para ngIf, ngFor, etc.
+import { FormsModule } from '@angular/forms'; // IMPORTANTE para ngModel
+import { AuthService } from 'src/app/services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-register',
   templateUrl: './register.page.html',
   styleUrls: ['./register.page.scss'],
   standalone: true,
-  imports: [IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule]
+  imports: [IonicModule, CommonModule, FormsModule], // Agrega aquí los módulos necesarios
 })
-export class RegisterPage implements OnInit {
+export class RegisterPage {
+  email = '';
+  password = '';
+  name = '';
+  avatarUrl = '';
 
-  constructor() { }
+  constructor(private auth: AuthService, private router: Router) {}
 
-  ngOnInit() {
+  async register() {
+    const { data, error } = await this.auth.register(this.email, this.password, this.name, this.avatarUrl);
+    if (error) {
+      alert('Error: ' + error.message);
+    } else {
+      alert('Cuenta creada exitosamente');
+      this.router.navigate(['/login']);
+    }
   }
-
 }
+

@@ -1,0 +1,64 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>💬 Chat en Tiempo Real</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [scrollEvents]="true">
+  <ion-list>
+    <ion-item *ngFor="let msg of messages">
+      <ion-avatar slot="start">
+        <img [src]="msg.avatar_url || 'assets/default-avatar.png'" />
+      </ion-avatar>
+      <ion-label>
+        <h3>{{ msg.user_name }}</h3>
+
+        <ng-container [ngSwitch]="msg.type">
+          <p *ngSwitchCase="'text'">{{ msg.message }}</p>
+
+          <p *ngSwitchCase="'location'">
+            <a
+              href="https://www.google.com/maps/search/?api=1&query={{ msg.message }}"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              📍 Ver ubicación
+            </a>
+          </p>
+
+          <p *ngSwitchCase="'image'">
+            <img [src]="msg.message" alt="Imagen enviada" style="max-width: 100%; border-radius: 8px;" />
+          </p>
+
+          <p *ngSwitchDefault>{{ msg.message }}</p>
+        </ng-container>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar>
+    <ion-item lines="none" style="display: flex; gap: 8px;">
+      <ion-input
+        [(ngModel)]="newMessage"
+        placeholder="Escribe un mensaje"
+        (keydown.enter)="sendMessage()"
+        clearInput
+        style="flex: 1;"
+      ></ion-input>
+
+      <ion-button (click)="sendLocation()" color="tertiary" size="small" title="Enviar ubicación">
+        📍
+      </ion-button>
+
+      <ion-button (click)="sendPhoto()" color="secondary" size="small" title="Enviar foto">
+        📷
+      </ion-button>
+
+      <ion-button (click)="sendMessage()" color="primary" size="small">
+        Enviar
+      </ion-button>
+    </ion-item>
+  </ion-toolbar>
+</ion-footer>

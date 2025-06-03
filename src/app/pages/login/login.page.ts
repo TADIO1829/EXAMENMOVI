@@ -1,20 +1,31 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
+import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular/standalone';
+import { AuthService } from 'src/app/services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.page.html',
   styleUrls: ['./login.page.scss'],
   standalone: true,
-  imports: [IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule]
+  imports: [IonicModule, CommonModule, FormsModule],
 })
-export class LoginPage implements OnInit {
+export class LoginPage {
+  email = '';
+  password = '';
 
-  constructor() { }
+  constructor(private authService: AuthService, private router: Router) {}
 
-  ngOnInit() {
+  async onLogin() {
+    const { data, error } = await this.authService.login(this.email, this.password);
+    if (error) {
+      console.error('Error al iniciar sesión:', error.message);
+      alert('Error al iniciar sesión: ' + error.message);
+    } else {
+      console.log('Usuario logueado:', data);
+      this.router.navigate(['/home']); // redirige después del login
+    }
   }
-
 }
