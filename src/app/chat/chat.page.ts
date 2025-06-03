@@ -9,13 +9,19 @@ import { FormsModule } from '@angular/forms';
 import { Geolocation } from '@capacitor/geolocation';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { v4 as uuidv4 } from 'uuid';
+import { HttpClient, HttpClientModule } from '@angular/common/http'; // 👈 Import HttpClientModule
 
 @Component({
   selector: 'app-chat',
   templateUrl: './chat.page.html',
   styleUrls: ['./chat.page.scss'],
   standalone: true,
-  imports: [CommonModule, IonicModule, FormsModule]
+  imports: [
+    CommonModule,
+    IonicModule,
+    FormsModule,
+    HttpClientModule // 👈 *** ADD THIS LINE ***
+  ]
 })
 export class ChatPage implements OnInit, OnDestroy {
   messages: ChatMessage[] = [];
@@ -29,14 +35,22 @@ export class ChatPage implements OnInit, OnDestroy {
   constructor(
     private chatService: ChatService,
     private supabase: SupabaseService,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private http: HttpClient
   ) {}
 
   async ngOnInit() {
     const user = await this.supabase.client.auth.getUser();
-    this.currentUserId = user.data.user?.id ?? '';
-    this.currentUserName = user.data.user?.user_metadata?.['name'] ?? 'Anónimo';
-    this.currentUserAvatar = user.data.user?.user_metadata?.['avatar_url'] ?? '';
+    if (user.data.user) {
+        this.currentUserId = user.data.user.id;
+        this.currentUserName = user.data.user.user_metadata?.['name'] ?? 'Anónimo';
+        this.currentUserAvatar = user.data.user.user_metadata?.['avatar_url'] ?? '';
+    } else {
+        console.warn('User not logged in for ChatPage');
+        // Handle case where user is not available, perhaps redirect or show a message
+        this.currentUserName = 'Anónimo'; // Default if no user
+    }
+
 
     await this.chatService.loadMessages();
 
@@ -53,7 +67,7 @@ export class ChatPage implements OnInit, OnDestroy {
   }
 
   async sendMessage() {
-    if (!this.newMessage.trim()) return;
+    if (!this.newMessage.trim() || !this.currentUserId) return;
 
     await this.chatService.sendMessage({
       user_id: this.currentUserId,
@@ -67,6 +81,7 @@ export class ChatPage implements OnInit, OnDestroy {
   }
 
   async sendLocation() {
+    if (!this.currentUserId) return;
     try {
       const coordinates = await Geolocation.getCurrentPosition();
       const { latitude, longitude } = coordinates.coords;
@@ -86,6 +101,7 @@ export class ChatPage implements OnInit, OnDestroy {
   }
 
   async sendPhoto() {
+    if (!this.currentUserId) return;
     try {
       const photo = await Camera.getPhoto({
         quality: 70,
@@ -96,14 +112,10 @@ export class ChatPage implements OnInit, OnDestroy {
 
       if (!photo.webPath) return;
 
-      // Obtener blob desde URI
       const response = await fetch(photo.webPath);
       const blob = await response.blob();
-
-      // Nombre único para la foto
       const fileName = `${uuidv4()}.jpeg`;
 
-      // Subir foto a Supabase Storage
       const { data, error: uploadError } = await this.supabase.client.storage
         .from('chat-photos')
         .upload(fileName, blob, {
@@ -115,7 +127,6 @@ export class ChatPage implements OnInit, OnDestroy {
         return;
       }
 
-      // Obtener URL pública de la foto
       const { data: publicUrlData } = this.supabase.client.storage
         .from('chat-photos')
         .getPublicUrl(fileName);
@@ -128,7 +139,6 @@ export class ChatPage implements OnInit, OnDestroy {
 
       console.log('URL pública imagen:', publicUrl);
 
-      // Enviar mensaje con URL de la imagen
       await this.chatService.sendMessage({
         user_id: this.currentUserId,
         user_name: this.currentUserName,
@@ -141,4 +151,21 @@ export class ChatPage implements OnInit, OnDestroy {
       console.error('Error enviando foto:', error);
     }
   }
+  enviarFraseChuckNorris() {
+  this.http.get<any>('https://api.chucknorris.io/jokes/random').subscribe({
+    next: async (response) => {
+      await this.chatService.sendMessage({
+        user_id: 'chuck-id', // Or this.currentUserId if Chuck should send as the current user
+        user_name: 'ChuckBot',
+        avatar_url: 'https://api.chucknorris.io/img/chucknorris_logo_coloured_small.png',
+        message: response.value,
+        type: 'text'
+      });
+    },
+    error: (err) => {
+      console.error('Error al obtener frase de Chuck Norris:', err);
+    }
+  });
+}
+
 }
